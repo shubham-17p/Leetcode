@@ -1,3 +1,5 @@
+const axios = require('axios');
+
 const getLanguageById = (lang)=>{
     const language = {
         "c++" : 54,
@@ -9,7 +11,6 @@ const getLanguageById = (lang)=>{
 }
 
 const submitBatch = async (submissions)=>{
-    const axios = require('axios');
 
     const options = {
         method: 'POST',
@@ -24,13 +25,13 @@ const submitBatch = async (submissions)=>{
     };
 
     async function fetchData() {
-	    try {
-		    const response = await axios.request(options);
-		        return response.data;
-	    }
+        try {
+            const response = await axios.request(options);
+                return response.data;
+        }
         catch (error) {
-		    console.error(error);
-	    }
+            console.error("Submit Batch Error : " +error);
+        }
     }
 
     return await fetchData();
@@ -59,24 +60,25 @@ const submitToken = async(resultToken)=>{
     };
 
     async function fetchData() {
-	    try {
-		    const response = await axios.request(options);
-		    return response.data;
-	    } catch (error) {
-		    console.error(error);
-	    }
+        try {
+            const response = await axios.request(options);
+            return response.data;
+        } catch (error) {
+            console.error("Submit Token Error : " +error);
+        }
     }
 
     while(true){
-    const result = await fetchData();
+        const result = await fetchData();
 
-    const IsResultObtained = result.submissions.every((r)=> r.status_id>2);
+        const IsResultObtained = result.submissions.every((r)=> r.status_id>2);
 
-    if(IsResultObtained)
-        return result.submission
-    
+        if(IsResultObtained)
+            return result.submissions//fixed s missing
+        
+        await waiting(1000)
+        
     }
-    await waiting(1000)
 
 }
 
