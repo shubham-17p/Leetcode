@@ -18,7 +18,7 @@ code: {
 },language: {
     type: String,
     required: true,
-    enum: ['javascript', 'cpp', 'java'] 
+    enum: ['javascript', 'c++', 'java'] 
 },
 status: {
     type: String,
@@ -49,3 +49,8 @@ testCasesTotal: {  // Recommended addition
 { 
 timestamps: true
 });
+
+
+const Submission = mongoose.model('submission',submissionSchema);
+
+module.exports = Submission;

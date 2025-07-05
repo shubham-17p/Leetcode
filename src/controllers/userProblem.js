@@ -25,7 +25,7 @@ const createProblem = async (req, res)=>{
                 const languageId = getLanguageById(language);
 
                 //submission vala array create kiya hain maine
-                const submission = visibleTestCases.map((testcase)=>({
+                const submissions = visibleTestCases.map((testcase)=>({
                     source_code:completeCode,
                     language_id:languageId,
                     stdin : testcase.input,
@@ -33,11 +33,12 @@ const createProblem = async (req, res)=>{
 
                 }))
 
-                const submitResult = await submitBatch(submission);
+                const submitResult = await submitBatch(submissions);
 
                 const resultToken = submitResult.map((value)=> value.token);
 
                 const testResult = await submitToken(resultToken);
+                //console.log(testResult)
 
                 for (const test of testResult)
                 {
@@ -154,7 +155,7 @@ const getProblemById = async (req,res)=>{
         if(!id){
             return res.status(400).send('Missing Id Field')
         }
-        const getProblem = await Problem.findById(id);
+        const getProblem = await Problem.findById(id).select("_id title description tags visibleTestCases startCode referenceSolution");
 
         if(!getProblem){
             return res.status(404).send('Problem is Missing')
@@ -168,9 +169,10 @@ const getProblemById = async (req,res)=>{
 
     }
 }
+
 const getAllProblem = async (req,res)=>{
     try{
-        const getProblem = await Problem.find({});
+        const getProblem = await Problem.find({}).select("_id title difficulty tags");
 
         if(getProblem.length==0){
             return res.status(404).send('Problem is Missing')
