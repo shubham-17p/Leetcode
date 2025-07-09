@@ -83,10 +83,14 @@ const submitCode = async (req , res)=>{
         submittedResult.memory = memory;
 
         await submittedResult.save();
+        
+        //ham problem id ko insert karenge user schema ke problem solved me if it is not present there
+        if(!req.result.problemSolved.includes(problemId)){
+            req.result.problemSolved.push(problemId)
+            await req.result.save()
+        }
 
         res.status(201).send(submittedResult);
-
-
 
     }
     catch(err)
@@ -97,6 +101,54 @@ const submitCode = async (req , res)=>{
 
 }
 
-module.exports = submitCode;
+const runCode = async(req,res)=>{
+    try
+    {
+        // user id chayihe
+        const userId = req.result._id;
+
+        // problem id chayihe
+        const problemId = req.params.id;
+
+        // code aur language req.body ke andar present hoga
+        const {code, language}= req.body;
+        
+
+        if(!userId||!code||!problemId||!language){
+            return res.status(400).send("some field missing")
+        }
+
+        // fetch the problem from the database
+        const problem = await Problem.findById(problemId)
+    
+        // visible tast cases
+
+        //judge0 ko code submit karna hain
+        const languageId = getLanguageById(language);
+        const submissions = problem.visibleTestCases.map((testcase)=>({
+                source_code:code,
+                language_id:languageId,
+                stdin : testcase.input,
+                expected_output:testcase.output
+
+            }))
+        const submitResult = await submitBatch(submissions);
+        const resultToken = submitResult.map((value)=> value.token);
+        const testResult = await submitToken(resultToken);
+
+    
+
+        res.status(201).send(testResult);
+
+    }
+    catch(err)
+    {
+        res.status(500).send("internal server error:"+err)
+
+    }
+
+}
+
+module.exports = {submitCode, runCode};
 
 
